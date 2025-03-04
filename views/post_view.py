@@ -57,4 +57,14 @@ def retrieve_post(pk):
 
         return serialized_post
 
+def create_post(post_data):
+    with sqlite3.connect("./db.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
 
+        db_cursor.execute("""
+        INSERT INTO Posts (user_id, category_id, title, publication_date, image_url, content, approved)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (post_data["user_id"],post_data["category_id"],post_data["title"],post_data["publication_date"],post_data["image_url"],post_data["content"],post_data["approved"]),)
+        return {"message": "create post was a success!"}

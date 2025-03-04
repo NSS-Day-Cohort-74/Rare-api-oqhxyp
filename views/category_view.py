@@ -25,6 +25,25 @@ def list_categories():
     return serialized_categories
 
 
+def create_category(category_data):
+    with sqlite3.connect("./db.sqlite3") as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute(
+            """
+        INSERT INTO Categories
+            (label)
+        VALUES
+            (?)
+        """,
+            (category_data["label"]),
+        )
+
+        rows_affected = db_cursor.rowcount
+
+    return True if rows_affected > 0 else False
+
+
 def update_category(id, category_data):
     with sqlite3.connect("./db.sqlite3") as conn:
         db_cursor = conn.cursor()
@@ -41,24 +60,17 @@ def update_category(id, category_data):
     return True if db_cursor.rowcount > 0 else False
 
 
-# def update_dock(id, dock_data):
-#     with sqlite3.connect("./shipping.db") as conn:
-#         db_cursor = conn.cursor()
 
-#         db_cursor.execute(
-#             """
-#             UPDATE Dock
-#                 SET
-#                     location = ?,
-#                     capacity = ?
-#             WHERE id = ?
-#             """,
-#             (dock_data['location'], dock_data['capacity'], id)
-#         )
+def delete_category(pk):
+    with sqlite3.connect("./db.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
 
-#     return True if db_cursor.rowcount > 0 else False
+        # Write the SQL query to get the information you want
+        db_cursor.execute("""
+        DELETE FROM Categories WHERE id = ?
+        """, (pk,)
+        )
+        number_of_rows_deleted = db_cursor.rowcount
 
-
-
-def delete_category():
-    pass
+    return True if number_of_rows_deleted > 0 else False

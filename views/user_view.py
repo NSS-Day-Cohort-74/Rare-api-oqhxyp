@@ -84,7 +84,46 @@ def list_users():
                 u.bio,
                 u.username,
                 u.profile_image_url,
-                u.created_on
+                u.created_on,
                 u.active,
                 u.is_admin
+            FROM Users u
         """
+        db_cursor.execute(query)
+
+        query_results = db_cursor.fetchall()
+
+        users=[]
+        for row in query_results:
+            users.append(dict(row))
+        
+        serialized_users = json.dumps(users)
+
+    return serialized_users
+
+def retrieve_user(pk):
+    with sqlite3.connect("./db.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+            SELECT
+                u.id,
+                u.first_name,
+                u.last_name,
+                u.email,
+                u.bio,
+                u.username,
+                u.profile_image_url,
+                u.created_on,
+                u.active,
+                u.is_admin
+            FROM Users u
+            WHERE u.id = ?
+            """, (pk,))
+
+        query_results = db_cursor.fetchone()
+
+        serialized_user = json.dumps(dict(query_results))
+
+    return serialized_user
