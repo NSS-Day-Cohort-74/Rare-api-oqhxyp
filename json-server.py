@@ -4,6 +4,9 @@ from nss_handler import HandleRequests, status
 
 # View Imports 
 from views import list_posts, retrieve_post
+from views import list_tags 
+from views import list_categories
+from views import create_user, login_user
 
 class JSONServer(HandleRequests):
     """Server class to handle incoming HTTP requests for Rare"""
@@ -19,15 +22,37 @@ class JSONServer(HandleRequests):
                 response_body = retrieve_post(url["pk"])
                 return self.response(response_body, status.HTTP_200_SUCCESS.value)
 
-            response_body = list_posts(url)
+            response_body = list_posts()
             return self.response(response_body, status.HTTP_200_SUCCESS.value)
 
+        elif url["requested_resource"] == "tags":
+            response_body = list_tags()
+            return self.response(response_body, status.HTTP_200_SUCCESS.value)
+        
+        elif url["requested_resource"] == "categories":
+            response_body = list_categories()
+            return self.response(response_body, status.HTTP_200_SUCCESS.value)
+            
         else:
             return self.response("", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
+        
+
 
     def do_POST(self):
-        """Handle POST Requests from the client"""
-        pass
+        content_len = int(self.headers.get('content-length', 0))
+        request_body = self.rfile.read(content_len)
+        data = json.loads(request_body)
+
+        url = self.parse_url(self.path)
+
+        if url["requested_resource"] == "users":
+            response_body = create_user(data)
+            if response_body:                                   
+                return self.response(json.dumps(response_body), status.HTTP_201_SUCCESS_CREATED.value)
+            return self.response("Resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
+        
+        else:
+            return self.response("Resource not found", status.HTTP_400_CLIENT_ERROR_BAD_REQUEST_DATA.value)
 
     def do_DELETE(self):
         """Handle DELETE Requests from the client"""

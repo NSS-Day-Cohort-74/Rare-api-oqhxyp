@@ -69,3 +69,22 @@ def create_user(user):
             'token': id,
             'valid': True
         })
+
+def list_users():
+    with sqlite3.connect("./db.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+    
+        query = """
+            SELECT 
+                u.id,
+                u.first_name,
+                u.last_name,
+                u.email,
+                u.bio,
+                u.username,
+                u.profile_image_url,
+                u.created_on
+                u.active,
+                u.is_admin
+        """

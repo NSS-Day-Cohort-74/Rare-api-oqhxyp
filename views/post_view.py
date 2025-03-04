@@ -3,8 +3,8 @@ import json
 
 
 
-def list_posts(url):
-    with sqlite3.connect("./database.sqlite3") as conn:
+def list_posts():
+    with sqlite3.connect("./db.sqlite3") as conn:
         conn.row_factory = sqlite3.Row
         db_cursor = conn.cursor()
 
@@ -33,7 +33,7 @@ def list_posts(url):
     return serialized_posts
 
 def retrieve_post(pk):
-    with sqlite3.connect("./databse.db") as conn:
+    with sqlite3.connect("./db.sqlite3") as conn:
         conn.row_factory = sqlite3.Row
         db_cursor = conn.cursor()
 
