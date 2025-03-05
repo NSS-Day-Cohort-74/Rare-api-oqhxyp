@@ -60,6 +60,12 @@ class JSONServer(HandleRequests):
                 return self.response(json.dumps(response_body), status.HTTP_201_SUCCESS_CREATED.value)
             return self.response("Resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
         
+        elif url["requested_resource"]== "login":
+            response_body = login_user(data)
+            if response_body:
+                return self.response(json.dumps(response_body), status.HTTP_201_SUCCESS_CREATED.value)
+            return self.response("Resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
+        
         
         elif url["requested_resource"] == "posts":
             response_body = create_post(data)
