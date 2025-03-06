@@ -19,6 +19,7 @@ def list_posts(url):
                 p.content,
                 p.approved
             FROM Posts p
+            ORDER BY p.publication_date DESC
             """
 
         expand_categories = False
@@ -54,6 +55,7 @@ def list_posts(url):
                 FROM Posts p
                 JOIN Categories c ON c.id = p.category_id
                 JOIN Users u ON u.id = p.user_id
+                ORDER BY p.publication_date DESC
                 """
         elif expand_categories:
             query = """
@@ -70,6 +72,7 @@ def list_posts(url):
                     c.label
                 FROM Posts p
                 JOIN Categories c ON c.id = p.category_id
+                ORDER BY p.publication_date DESC
                 """
         elif expand_users:
             query = """
@@ -90,6 +93,7 @@ def list_posts(url):
                     u.bio
                 FROM Posts p
                 JOIN Users u ON u.id = p.user_id
+                ORDER BY p.publication_date DESC
                 """
 
         db_cursor.execute(query)
