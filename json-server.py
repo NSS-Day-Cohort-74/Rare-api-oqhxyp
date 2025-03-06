@@ -4,7 +4,7 @@ from nss_handler import HandleRequests, status
 
 # View Imports 
 from views import list_posts, retrieve_post, create_post
-from views import list_tags 
+from views import list_tags, create_tag
 from views import list_categories, update_category, delete_category, create_category
 from views import create_user, login_user, retrieve_user, list_users 
 
@@ -73,6 +73,11 @@ class JSONServer(HandleRequests):
                 return self.response(json.dumps(response_body), status.HTTP_201_SUCCESS_CREATED.value)
             return self.response("Resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
         
+        elif url["requested_resource"] == "tags":
+            response_body = create_tag(data)
+            if response_body: 
+                return self.response(json.dumps(response_body), status.HTTP_201_SUCCESS_CREATED.value)
+            return self.response("Resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
         else:
             return self.response("Resource not found", status.HTTP_400_CLIENT_ERROR_BAD_REQUEST_DATA.value)
 
