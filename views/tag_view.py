@@ -32,7 +32,7 @@ def create_tag(tag_data):
         """ 
         INSERT INTO Tags (label) 
         VALUES (?)
-        """, (tag_data["label"]),
+        """, (tag_data["label"],),
         ) 
         return {"message": "tag has been posted" }
 
