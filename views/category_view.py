@@ -1,7 +1,7 @@
 import sqlite3
 import json
 
-def list_categories():
+def list_categories(url):
     with sqlite3.connect("./db.sqlite3") as conn:
         conn.row_factory = sqlite3.Row
         db_cursor = conn.cursor()
@@ -11,6 +11,7 @@ def list_categories():
                 c.id,
                 c.label
             FROM Categories c
+            ORDER BY c.label ASC
             """
         db_cursor.execute(query)
 
