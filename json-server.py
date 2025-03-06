@@ -22,7 +22,7 @@ class JSONServer(HandleRequests):
                 response_body = retrieve_post(url["pk"])
                 return self.response(response_body, status.HTTP_200_SUCCESS.value)
 
-            response_body = list_posts()
+            response_body = list_posts(url)
             return self.response(response_body, status.HTTP_200_SUCCESS.value)
 
         elif url["requested_resource"] == "tags":
@@ -30,7 +30,7 @@ class JSONServer(HandleRequests):
             return self.response(response_body, status.HTTP_200_SUCCESS.value)
         
         elif url["requested_resource"] == "categories":
-            response_body = list_categories()
+            response_body = list_categories(url)
             return self.response(response_body, status.HTTP_200_SUCCESS.value)
         
         elif url["requested_resource"] == "users":
@@ -38,7 +38,7 @@ class JSONServer(HandleRequests):
                 response_body = retrieve_user(url["pk"])
                 return self.response(response_body, status.HTTP_200_SUCCESS.value)
 
-            response_body = list_users()
+            response_body = list_users(url)
             return self.response(response_body, status.HTTP_200_SUCCESS.value)
 
             
