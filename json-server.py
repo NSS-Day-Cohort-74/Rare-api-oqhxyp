@@ -30,7 +30,7 @@ class JSONServer(HandleRequests):
             return self.response(response_body, status.HTTP_200_SUCCESS.value)
         
         elif url["requested_resource"] == "categories":
-            response_body = list_categories(url)
+            response_body = list_categories()
             return self.response(response_body, status.HTTP_200_SUCCESS.value)
         
         elif url["requested_resource"] == "users":
@@ -38,7 +38,7 @@ class JSONServer(HandleRequests):
                 response_body = retrieve_user(url["pk"])
                 return self.response(response_body, status.HTTP_200_SUCCESS.value)
 
-            response_body = list_users(url)
+            response_body = list_users()
             return self.response(response_body, status.HTTP_200_SUCCESS.value)
 
             
