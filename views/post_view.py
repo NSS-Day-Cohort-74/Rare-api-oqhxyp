@@ -139,14 +139,41 @@ def retrieve_post(pk):
                 p.publication_date,
                 p.image_url,
                 p.content,
-                p.approved
+                p.approved,
+                u.id userId,
+                u.first_name,
+                u.last_name,
+                c.id categoryId,
+                c.label
             FROM Posts p
+            JOIN Users u ON p.user_id = u.id
+            JOIN Categories c ON p.category_id = c.id
             WHERE p.id = ?
             """, (pk,))
 
         query_results = db_cursor.fetchone()
 
-        serialized_post = json.dumps(dict(query_results))
+        post = {
+            "id": query_results["id"],
+            "user_id": query_results["user_id"],
+            "user":{
+                "id": query_results["userId"],
+                "first_name": query_results["first_name"],
+                "last_name": query_results["last_name"]
+            },
+            "category_id":  query_results["category_id"],
+            "categories":{
+                "id": query_results["categoryId"],
+                "label": query_results["label"]
+            },
+            "title": query_results["title"],
+            "publication_date": query_results["publication_date"],
+            "image_url": query_results["image_url"],
+            "content": query_results["content"],
+            "approved": query_results["approved"]
+        }
+
+        serialized_post = json.dumps(post)
 
         return serialized_post
 
