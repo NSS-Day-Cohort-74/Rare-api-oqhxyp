@@ -37,7 +37,7 @@ def create_category(category_data):
         VALUES
             (?)
         """,
-            (category_data["label"]),
+            (category_data["label"],),
         )
 
         rows_affected = db_cursor.rowcount
