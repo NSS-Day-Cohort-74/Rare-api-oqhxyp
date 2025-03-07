@@ -209,3 +209,30 @@ def create_post(post_data):
 
         return new_post
     
+        return {"message": "create post was a success!"}
+
+def update_post(id, post_data):
+    with sqlite3.connect("./db.sqlite3") as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute(
+            """
+            UPDATE Posts
+                SET
+                    user_id = ?,
+                    category_id = ?,
+                    title = ?,
+                    publication_date = ?,
+                    image_url = ?, 
+                    content = ?,
+                    approved = ?
+            WHERE id = ?
+            """,
+            (post_data['user_id'], post_data['category_id'], post_data['title'], 
+             post_data['publication_date'], post_data['image_url'], 
+             post_data['content'], post_data['approved'], id)
+        )
+
+        rows_affected = db_cursor.rowcount
+
+    return True if rows_affected > 0 else False
