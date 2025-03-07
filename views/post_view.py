@@ -191,4 +191,21 @@ def create_post(post_data):
             VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
         (post_data["user_id"],post_data["category_id"],post_data["title"],post_data["publication_date"],post_data["image_url"],post_data["content"],post_data["approved"]),)
-        return {"message": "create post was a success!"}
+
+        #Return the row data that was created above with the new post
+        new_post_created_id = int(db_cursor.lastrowid)
+        conn.commit
+
+        #Write the SQL Query that will be returned 
+        db_cursor.execute("""
+            SELECT 
+                p.id
+            FROM Posts p
+            WHERE p.id = ?
+        """, (new_post_created_id,))
+        query_results = db_cursor.fetchone()
+
+        new_post = dict(query_results)
+
+        return new_post
+    

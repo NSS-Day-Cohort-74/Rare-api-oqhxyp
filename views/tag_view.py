@@ -36,6 +36,17 @@ def create_tag(tag_data):
         ) 
         return {"message": "tag has been posted" }
 
+def create_posttag(posttag_data):
+    with sqlite3.connect("./db.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        INSERT INTO PostTags (post_id, tag_id)
+            VALUES (?, ?)
+        """,
+        (posttag_data["post_id"],posttag_data["tag_id"]),)
+        return {"message": "created post tags successfully!"}
 
 def delete_tag():
     pass
