@@ -3,9 +3,9 @@ from http.server import HTTPServer
 from nss_handler import HandleRequests, status
 
 # View Imports 
-from views import list_posts, retrieve_post, create_post
+from views import list_posts, retrieve_post, create_post, update_post
 from views import list_tags, create_tag, create_posttag
-from views import list_categories, update_category, delete_category
+from views import list_categories, update_category, delete_category, create_category
 from views import create_user, login_user, retrieve_user, list_users 
 
 class JSONServer(HandleRequests):
@@ -30,7 +30,7 @@ class JSONServer(HandleRequests):
             return self.response(response_body, status.HTTP_200_SUCCESS.value)
         
         elif url["requested_resource"] == "categories":
-            response_body = list_categories()
+            response_body = list_categories(url)
             return self.response(response_body, status.HTTP_200_SUCCESS.value)
         
         elif url["requested_resource"] == "users":
@@ -71,6 +71,13 @@ class JSONServer(HandleRequests):
             if response_body:                                   
                 return self.response(json.dumps(response_body), status.HTTP_201_SUCCESS_CREATED.value)
             return self.response("Resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
+
+        elif url["requested_resource"] == "categories":
+            response_body = create_category(data)
+            if response_body:                                   
+                return self.response(json.dumps(response_body), status.HTTP_201_SUCCESS_CREATED.value)
+            return self.response("Resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
+        
         
         elif url["requested_resource"] == "posttags":
             response_body = create_posttag(data)
@@ -121,6 +128,11 @@ class JSONServer(HandleRequests):
                 if successfully_updated:
                     return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
 
+        elif url["requested_resource"] == "posts":
+            if pk != 0:
+                successfully_updated = update_post(pk, request_body)
+                if successfully_updated:
+                    return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
 
         return self.response("Requested resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
 
