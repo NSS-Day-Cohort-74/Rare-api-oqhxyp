@@ -4,7 +4,7 @@ from nss_handler import HandleRequests, status
 
 # View Imports 
 from views import list_posts, retrieve_post, create_post, update_post
-from views import list_tags, create_tag, create_posttag
+from views import list_tags, create_tag, create_posttag, get_post_tags, delete_post_tags, update_post_tags
 from views import list_categories, update_category, delete_category, create_category
 from views import create_user, login_user, retrieve_user, list_users 
 
@@ -17,6 +17,13 @@ class JSONServer(HandleRequests):
         response_body = ""
         url = self.parse_url(self.path)
 
+        path_parts = self.path.split('/')
+        if len(path_parts) >= 4 and path_parts[1] == "tags" and path_parts[2] == "posts" and path_parts[3].isdigit():
+            post_id = int(path_parts[3])
+            response_body = get_post_tags(post_id)
+            return self.response(response_body, status.HTTP_200_SUCCESS.value)
+
+
         if url["requested_resource"] == "posts":
             if url["pk"] != 0:
                 response_body = retrieve_post(url["pk"])
@@ -28,7 +35,12 @@ class JSONServer(HandleRequests):
         elif url["requested_resource"] == "tags":
             response_body = list_tags()
             return self.response(response_body, status.HTTP_200_SUCCESS.value)
-        
+
+        # elif url["requested_resource"] == "tags" and url["query_params"] and "post_id" in url["query_params"]:
+        #     post_id = url["query_params"]["post_id"][0]
+        #     response_body = get_post_tags(post_id)
+        #     return self.response(response_body, status.HTTP_200_SUCCESS.value)
+
         elif url["requested_resource"] == "categories":
             response_body = list_categories(url)
             return self.response(response_body, status.HTTP_200_SUCCESS.value)
@@ -59,7 +71,8 @@ class JSONServer(HandleRequests):
             if response_body:                                   
                 return self.response(json.dumps(response_body), status.HTTP_201_SUCCESS_CREATED.value)
             return self.response("Resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
-        
+      
+
         elif url["requested_resource"]== "login":
             response_body = login_user(data)
             if response_body:
@@ -99,6 +112,13 @@ class JSONServer(HandleRequests):
         url = self.parse_url(self.path)
         pk = url["pk"]
 
+        # Special case for tags/posts/{id} route
+        path_parts = self.path.split('/')
+        if len(path_parts) >= 4 and path_parts[1] == "tags" and path_parts[2] == "posts" and path_parts[3].isdigit():
+            post_id = int(path_parts[3])
+            response_body = delete_post_tags(post_id)
+            return self.response(json.dumps(response_body), status.HTTP_200_SUCCESS.value)
+
         if url["requested_resource"] == "categories":
             if pk != 0:
                 successfully_deleted = delete_category(pk)
@@ -109,6 +129,7 @@ class JSONServer(HandleRequests):
 
         else:
             return self.response("Not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
+
 
     def do_PUT(self):
         """Handle PUT requests from a client"""
@@ -122,12 +143,20 @@ class JSONServer(HandleRequests):
         request_body = self.rfile.read(content_len)
         request_body = json.loads(request_body)
 
+    
+        path_parts = self.path.split('/')
+        if len(path_parts) >= 4 and path_parts[1] == "tags" and path_parts[2] == "posts" and path_parts[3].isdigit():
+            post_id = int(path_parts[3])
+            response_body = update_post_tags(post_id, request_body)
+            return self.response(json.dumps(response_body), status.HTTP_200_SUCCESS.value)
+
+        # Handle other PUT routes
         if url["requested_resource"] == "categories":
             if pk != 0:
                 successfully_updated = update_category(pk, request_body)
                 if successfully_updated:
                     return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
-
+        
         elif url["requested_resource"] == "posts":
             if pk != 0:
                 successfully_updated = update_post(pk, request_body)
@@ -135,6 +164,8 @@ class JSONServer(HandleRequests):
                     return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
 
         return self.response("Requested resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
+
+
 
 # THE CODE BELOW THIS LINE IS NOT IMPORTANT FOR REACHING YOUR LEARNING OBJECTIVES BUT IMPORTANT FOR SETTING THE RIGHT PORT TO LISTEN TO
 def main():
