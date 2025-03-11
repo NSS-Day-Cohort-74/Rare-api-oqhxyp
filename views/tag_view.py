@@ -24,6 +24,60 @@ def list_tags():
     
     return serialized_tags
 
+
+def list_PostTags(url):
+    with sqlite3.connect("./db.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        query = """
+            SELECT 
+                pt.id,
+                pt.post_id,
+                pt.tag_id
+            FROM PostTags pt
+        """
+
+        expand_tags = False
+        if "query_params" in url and "_expand" in url["query_params"] and "tag" in url["query_params"]["_expand"]:
+            expand_tags = True
+            query = """
+                SELECT
+                    pt.id,
+                    pt.post_id,
+                    pt.tag_id,
+                    t.id as tagId,
+                    t.label
+                FROM PostTags pt
+                JOIN Tags t ON t.id = pt.tag_id
+                """
+        db_cursor.execute(query)
+        query_results = db_cursor.fetchall()
+          
+        postTags = []
+
+        for row in query_results:
+            row_dict = dict(row)  
+            
+            post_tag = {
+                "id": row_dict["id"],
+                "post_id": row_dict["post_id"],
+                "tag_id": row_dict["tag_id"]
+            }
+            
+            
+            if expand_tags:
+                post_tag["tag"] = {
+                    "id": row_dict["tagId"],
+                    "label": row_dict["label"]
+                }
+                
+            postTags.append(post_tag)
+
+        serialized_postTags = json.dumps(postTags)
+    
+    return serialized_postTags
+
 def create_tag(tag_data):
     with sqlite3.connect('./db.sqlite3') as conn:
         conn.row_factory = sqlite3.Row
