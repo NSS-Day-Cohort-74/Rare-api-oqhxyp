@@ -7,7 +7,7 @@ from views import list_posts, retrieve_post, create_post, update_post
 from views import list_tags, create_tag, create_posttag, get_post_tags, delete_post_tags, update_post_tags
 from views import list_categories, update_category, delete_category, create_category
 from views import create_user, login_user, retrieve_user, list_users 
-from views import list_subscriptions, create_subscription, delete_subscription
+from views import list_subscriptions, create_subscription, delete_subscription, subscriptions_posts
 
 class JSONServer(HandleRequests):
     """Server class to handle incoming HTTP requests for Rare"""
@@ -56,6 +56,10 @@ class JSONServer(HandleRequests):
 
         elif url["requested_resource"] == "subscriptions":
             response_body = list_subscriptions()
+            return self.response(response_body, status.HTTP_200_SUCCESS.value)
+        
+        elif url["requested_resource"] == "favoriteSubscriptions":
+            response_body = subscriptions_posts(url)
             return self.response(response_body, status.HTTP_200_SUCCESS.value)
             
         else:
