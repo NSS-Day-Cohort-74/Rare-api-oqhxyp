@@ -88,6 +88,7 @@ def list_users():
                 u.active,
                 u.is_admin
             FROM Users u
+            ORDER by u.username
         """
         db_cursor.execute(query)
 

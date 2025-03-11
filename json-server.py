@@ -8,7 +8,9 @@ from views import list_posts, retrieve_post, create_post, update_post
 from views import list_tags, create_tag, create_posttag, get_post_tags, delete_post_tags, update_post_tags, list_PostTags
 from views import list_categories, update_category, delete_category, create_category
 from views import create_user, login_user, retrieve_user, list_users 
+from views import list_subscriptions, create_subscription, delete_subscription, subscriptions_posts
 from views import create_comment, list_comments, delete_comment
+
 
 class JSONServer(HandleRequests):
     """Server class to handle incoming HTTP requests for Rare"""
@@ -61,6 +63,14 @@ class JSONServer(HandleRequests):
             response_body = list_comments(url)
             return self.response(response_body, status.HTTP_200_SUCCESS.value)
 
+        elif url["requested_resource"] == "subscriptions":
+            response_body = list_subscriptions()
+            return self.response(response_body, status.HTTP_200_SUCCESS.value)
+        
+        elif url["requested_resource"] == "favoriteSubscriptions":
+            response_body = subscriptions_posts(url)
+            return self.response(response_body, status.HTTP_200_SUCCESS.value)
+
         else:
             return self.response("", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
         
@@ -111,6 +121,10 @@ class JSONServer(HandleRequests):
                 return self.response(json.dumps(response_body), status.HTTP_201_SUCCESS_CREATED.value)
             return self.response("Resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
         
+        elif url["requested_resource"]=="subscriptions":
+            response_body = create_subscription(data)
+            if response_body:
+                return self. response(json.dumps(response_body),status.HTTP_201_SUCCESS_CREATED.value)
         elif url["requested_resource"] == "comments":
             response_body = create_comment(data)
             if response_body: 
@@ -140,6 +154,14 @@ class JSONServer(HandleRequests):
                     return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
 
                 return self.response("Requested resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
+
+        elif url["requested_resource"] == "subscriptions":
+            if pk != 0:
+                successfully_deleted = delete_subscription(pk)
+                if successfully_deleted:
+                    return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
+                
+                return self.response("Requested resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
             
         elif url["requested_resource"]=="posts":
             if pk !=0:
@@ -154,7 +176,7 @@ class JSONServer(HandleRequests):
                 if successfully_deleted:
                     return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
                 return self.response("Requested resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
-        
+              
         else:
             return self.response("Not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
 
