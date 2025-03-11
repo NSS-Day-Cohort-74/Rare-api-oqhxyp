@@ -3,10 +3,12 @@ from http.server import HTTPServer
 from nss_handler import HandleRequests, status
 
 # View Imports 
+
 from views import list_posts, retrieve_post, create_post, update_post
 from views import list_tags, create_tag, create_posttag, get_post_tags, delete_post_tags, update_post_tags, list_PostTags
 from views import list_categories, update_category, delete_category, create_category
 from views import create_user, login_user, retrieve_user, list_users 
+from views import create_comment, list_comments, delete_comment
 
 class JSONServer(HandleRequests):
     """Server class to handle incoming HTTP requests for Rare"""
@@ -54,11 +56,11 @@ class JSONServer(HandleRequests):
             if url["pk"] != 0:
                 response_body = retrieve_user(url["pk"])
                 return self.response(response_body, status.HTTP_200_SUCCESS.value)
-
-            response_body = list_users()
+        
+        elif url["requested_resource"] == "comments":
+            response_body = list_comments(url)
             return self.response(response_body, status.HTTP_200_SUCCESS.value)
 
-            
         else:
             return self.response("", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
         
@@ -108,6 +110,13 @@ class JSONServer(HandleRequests):
             if response_body: 
                 return self.response(json.dumps(response_body), status.HTTP_201_SUCCESS_CREATED.value)
             return self.response("Resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
+        
+        elif url["requested_resource"] == "comments":
+            response_body = create_comment(data)
+            if response_body: 
+                return self.response(json.dumps(response_body), status.HTTP_201_SUCCESS_CREATED.value)
+            return self.response("Resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
+
         else:
             return self.response("Resource not found", status.HTTP_400_CLIENT_ERROR_BAD_REQUEST_DATA.value)
 
@@ -131,7 +140,21 @@ class JSONServer(HandleRequests):
                     return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
 
                 return self.response("Requested resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
-
+            
+        elif url["requested_resource"]=="posts":
+            if pk !=0:
+                successfully_deleted=delete_post(pk)
+                if successfully_deleted:
+                    return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
+                return self.response("Requested resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
+        
+        elif url["requested_resource"]=="comments":
+            if pk !=0:
+                successfully_deleted=delete_comment(pk)
+                if successfully_deleted:
+                    return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
+                return self.response("Requested resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
+        
         else:
             return self.response("Not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
 
@@ -167,8 +190,8 @@ class JSONServer(HandleRequests):
                 successfully_updated = update_post(pk, request_body)
                 if successfully_updated:
                     return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
-
-        return self.response("Requested resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
+        else:
+            return self.response("Requested resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
 
 
 
