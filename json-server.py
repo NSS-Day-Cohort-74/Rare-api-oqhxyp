@@ -4,7 +4,7 @@ from nss_handler import HandleRequests, status
 
 # View Imports 
 from views import list_posts, retrieve_post, create_post, update_post
-from views import list_tags, create_tag, create_posttag, get_post_tags, delete_post_tags, update_post_tags
+from views import list_tags, create_tag, create_posttag, get_post_tags, delete_post_tags, update_post_tags, list_PostTags
 from views import list_categories, update_category, delete_category, create_category
 from views import create_user, login_user, retrieve_user, list_users 
 
@@ -24,6 +24,11 @@ class JSONServer(HandleRequests):
             return self.response(response_body, status.HTTP_200_SUCCESS.value)
 
 
+        if url["requested_resource"] == "posttags":
+            response_body = list_PostTags(url)
+            return self.response(response_body, status.HTTP_200_SUCCESS.value)
+            
+        
         if url["requested_resource"] == "posts":
             if url["pk"] != 0:
                 response_body = retrieve_post(url["pk"])
