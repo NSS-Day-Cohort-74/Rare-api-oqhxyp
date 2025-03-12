@@ -4,12 +4,12 @@ from nss_handler import HandleRequests, status
 
 # View Imports 
 
-from views import list_posts, retrieve_post, create_post, update_post
+from views import list_posts, retrieve_post, create_post, update_post,delete_post
 from views import list_tags, create_tag, create_posttag, get_post_tags, delete_post_tags, update_post_tags, list_PostTags
 from views import list_categories, update_category, delete_category, create_category
 from views import create_user, login_user, retrieve_user, list_users 
 from views import list_subscriptions, create_subscription, delete_subscription, subscriptions_posts
-from views import create_comment, list_comments, delete_comment
+from views import create_comment, list_comments, delete_comment, retrieve_comment, update_comment
 
 
 class JSONServer(HandleRequests):
@@ -63,8 +63,13 @@ class JSONServer(HandleRequests):
             return self.response(response_body, status.HTTP_200_SUCCESS.value)
         
         elif url["requested_resource"] == "comments":
+            if url["pk"] != 0:
+                response_body = retrieve_comment(url["pk"])
+                return self.response(response_body, status.HTTP_200_SUCCESS.value)
+            
             response_body = list_comments(url)
             return self.response(response_body, status.HTTP_200_SUCCESS.value)
+        
 
         elif url["requested_resource"] == "subscriptions":
             response_body = list_subscriptions()
@@ -204,9 +209,15 @@ class JSONServer(HandleRequests):
             return self.response(json.dumps(response_body), status.HTTP_200_SUCCESS.value)
 
         # Handle other PUT routes
-        if url["requested_resource"] == "categories":
+        elif url["requested_resource"] == "categories":
             if pk != 0:
                 successfully_updated = update_category(pk, request_body)
+                if successfully_updated:
+                    return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
+                
+        elif url["requested_resource"] == "comments":
+            if pk != 0:
+                successfully_updated = update_comment(pk, request_body)
                 if successfully_updated:
                     return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
         
