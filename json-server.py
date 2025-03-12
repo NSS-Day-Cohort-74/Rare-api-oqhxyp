@@ -41,10 +41,6 @@ class JSONServer(HandleRequests):
             response_body = list_tags()
             return self.response(response_body, status.HTTP_200_SUCCESS.value)
 
-        # elif url["requested_resource"] == "tags" and url["query_params"] and "post_id" in url["query_params"]:
-        #     post_id = url["query_params"]["post_id"][0]
-        #     response_body = get_post_tags(post_id)
-        #     return self.response(response_body, status.HTTP_200_SUCCESS.value)
 
         elif url["requested_resource"] == "categories":
             response_body = list_categories(url)
