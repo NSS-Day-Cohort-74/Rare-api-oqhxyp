@@ -20,6 +20,27 @@ def create_comment(comment_data):
 
     return True if db_cursor.rowcount > 0 else False
 
+def retrieve_comment(pk):
+    with sqlite3.connect("./db.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+            SELECT
+                c.id,
+                c.post_id,
+                c.author_id,
+                c.content
+            FROM Comments c
+            WHERE c.id=?              
+            """, (pk,))
+
+        query_results = db_cursor.fetchone()
+
+        serialized_comment = json.dumps(dict(query_results))
+
+    return serialized_comment
+
 
 def list_comments(url):
     with sqlite3.connect("./db.sqlite3") as conn:
@@ -94,3 +115,28 @@ def delete_comment(pk):
         number_of_rows_deleted = db_cursor.rowcount
 
     return True if number_of_rows_deleted > 0 else False
+
+def update_comment(id, comment_data):
+    with sqlite3.connect("./db.sqlite3") as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute(
+            """
+            UPDATE Comments
+                SET
+                    post_id = ?,
+                    author_id = ?,
+                    content = ?
+            WHERE id = ?
+            """,
+            (
+                comment_data["post_id"],
+                comment_data["author_id"],
+                comment_data["content"],
+                id,
+            ),
+        )
+
+        rows_affected = db_cursor.rowcount
+
+    return True if rows_affected > 0 else False
