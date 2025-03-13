@@ -128,3 +128,25 @@ def retrieve_user(pk):
         serialized_user = json.dumps(dict(query_results))
 
     return serialized_user
+
+def update_user(pk, data):
+    with sqlite3.connect("./db.sqlite3") as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute(
+            """
+                UPDATE USERS
+                    SET
+                        id = ?,
+                        is_admin = ?
+                WHERE id = ?
+            """, (
+                data["id"],
+                data["is_admin"],
+                data["id"],
+            )
+        )
+
+        rows_affected = db_cursor.rowcount
+    
+    return True if rows_affected > 0 else False 

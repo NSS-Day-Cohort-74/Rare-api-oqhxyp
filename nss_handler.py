@@ -38,7 +38,7 @@ class HandleRequests(BaseHTTPRequestHandler):
             url_dictionary["pk"] = pk
         except (IndexError, ValueError):
             pass
-
+ 
         return url_dictionary
 
     def set_response_code(self, status):
