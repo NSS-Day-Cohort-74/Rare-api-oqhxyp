@@ -151,7 +151,29 @@ def update_user(pk, data):
     
     return True if rows_affected > 0 else False 
 
-def reactivate_user(pk,data):
+def reactivate_user(data):
+    with sqlite3.connect("./db.sqlite3") as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute(
+            """
+                UPDATE USERS
+                    SET
+                        id = ?,
+                        active = ?
+                WHERE id = ?
+            """, (
+                data["id"],
+                data["active"],
+                data["id"],
+            )
+        )
+
+        rows_affected = db_cursor.rowcount
+    
+    return True if rows_affected > 0 else False 
+
+def deactivate_user(data):
     with sqlite3.connect("./db.sqlite3") as conn:
         db_cursor = conn.cursor()
 
