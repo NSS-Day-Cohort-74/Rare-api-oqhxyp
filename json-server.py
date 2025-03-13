@@ -56,9 +56,7 @@ class JSONServer(HandleRequests):
             
             response_body = list_users()
             return self.response(response_body, status.HTTP_200_SUCCESS.value)
-        
-            response_body = list_users()
-            return self.response(response_body, status.HTTP_200_SUCCESS.value)
+
         elif url["requested_resource"] == "comments":
             if url["pk"] != 0:
                 response_body = retrieve_comment(url["pk"])
