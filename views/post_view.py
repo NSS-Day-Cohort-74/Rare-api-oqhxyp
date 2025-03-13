@@ -2,7 +2,6 @@ import sqlite3
 import json
 
 
-
 def list_posts(url):
     with sqlite3.connect("./db.sqlite3") as conn:
         conn.row_factory = sqlite3.Row
@@ -79,12 +78,14 @@ def list_posts(url):
 
     return serialized_posts
 
+
 def retrieve_post(pk):
     with sqlite3.connect("./db.sqlite3") as conn:
         conn.row_factory = sqlite3.Row
         db_cursor = conn.cursor()
 
-        db_cursor.execute("""
+        db_cursor.execute(
+            """
             SELECT
                 p.id,
                 p.user_id,
@@ -103,63 +104,80 @@ def retrieve_post(pk):
             JOIN Users u ON p.user_id = u.id
             JOIN Categories c ON p.category_id = c.id
             WHERE p.id = ?
-            """, (pk,))
+            """,
+            (pk,),
+        )
 
         query_results = db_cursor.fetchone()
 
         post = {
             "id": query_results["id"],
             "user_id": query_results["user_id"],
-            "user":{
+            "user": {
                 "id": query_results["userId"],
                 "first_name": query_results["first_name"],
-                "last_name": query_results["last_name"]
+                "last_name": query_results["last_name"],
             },
-            "category_id":  query_results["category_id"],
-            "categories":{
+            "category_id": query_results["category_id"],
+            "categories": {
                 "id": query_results["categoryId"],
-                "label": query_results["label"]
+                "label": query_results["label"],
             },
             "title": query_results["title"],
             "publication_date": query_results["publication_date"],
             "image_url": query_results["image_url"],
             "content": query_results["content"],
-            "approved": query_results["approved"]
+            "approved": query_results["approved"],
         }
 
         serialized_post = json.dumps(post)
 
         return serialized_post
 
+
 def create_post(post_data):
     with sqlite3.connect("./db.sqlite3") as conn:
         conn.row_factory = sqlite3.Row
         db_cursor = conn.cursor()
 
-        db_cursor.execute("""
+        db_cursor.execute(
+            """
         INSERT INTO Posts (user_id, category_id, title, publication_date, image_url, content, approved)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
-        (post_data["user_id"],post_data["category_id"],post_data["title"],post_data["publication_date"],post_data["image_url"],post_data["content"],post_data["approved"]),)
+            (
+                post_data["user_id"],
+                post_data["category_id"],
+                post_data["title"],
+                post_data["publication_date"],
+                post_data["image_url"],
+                post_data["content"],
+                post_data["approved"],
+            ),
+        )
 
-        #Return the row data that was created above with the new post
+        # Return the row data that was created above with the new post
         new_post_created_id = int(db_cursor.lastrowid)
         conn.commit
 
-        #Write the SQL Query that will be returned 
-        db_cursor.execute("""
+        # Write the SQL Query that will be returned
+        db_cursor.execute(
+            """
             SELECT 
                 p.id
             FROM Posts p
             WHERE p.id = ?
-        """, (new_post_created_id,))
+        """,
+            (new_post_created_id,),
+        )
         query_results = db_cursor.fetchone()
 
         new_post = dict(query_results)
 
         return new_post
-    
+
         return {"message": "create post was a success!"}
+
 
 def update_post(id, post_data):
     with sqlite3.connect("./db.sqlite3") as conn:
@@ -178,11 +196,36 @@ def update_post(id, post_data):
                     approved = ?
             WHERE id = ?
             """,
-            (post_data['user_id'], post_data['category_id'], post_data['title'], 
-             post_data['publication_date'], post_data['image_url'], 
-             post_data['content'], post_data['approved'], id)
+            (
+                post_data["user_id"],
+                post_data["category_id"],
+                post_data["title"],
+                post_data["publication_date"],
+                post_data["image_url"],
+                post_data["content"],
+                post_data["approved"],
+                id,
+            ),
         )
 
         rows_affected = db_cursor.rowcount
 
     return True if rows_affected > 0 else False
+
+
+def delete_post(pk):
+    with sqlite3.connect("./db.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        # Write the SQL query to get the information you want
+        db_cursor.execute(
+            """
+        DELETE FROM Posts WHERE id = ?
+        """,
+            (pk,),
+        )
+        number_of_rows_deleted = db_cursor.rowcount
+        
+    return True if number_of_rows_deleted > 0 else False
+
