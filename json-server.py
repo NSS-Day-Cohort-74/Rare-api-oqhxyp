@@ -6,7 +6,7 @@ from nss_handler import HandleRequests, status
 from views import list_posts, retrieve_post, create_post, update_post,delete_post
 from views import list_tags, create_tag, create_posttag, get_post_tags, delete_post_tags, update_post_tags, list_PostTags
 from views import list_categories, update_category, delete_category, create_category
-from views import create_user, login_user, retrieve_user, list_users, update_user 
+from views import create_user, login_user, retrieve_user, list_users, update_user, reactivate_user
 from views import list_subscriptions, create_subscription, delete_subscription, subscriptions_posts
 from views import create_comment, list_comments, delete_comment, retrieve_comment, update_comment
 
@@ -231,6 +231,12 @@ class JSONServer(HandleRequests):
                 successfully_updated = update_user(pk, request_body)
                 if successfully_updated:
                     return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
+                
+        elif url["requested_resource"] == "reactivateUsers":
+            if pk !=0:
+                successfully_updated = reactivate_user(pk, request_body)
+                if successfully_updated:
+                    return self.response("",status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
                 
         else:
             return self.response("Requested resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
