@@ -16,107 +16,64 @@ def list_posts(url):
                 p.publication_date,
                 p.image_url,
                 p.content,
-                p.approved
+                p.approved,
+                c.id as category_id,
+                c.label as category_label,
+                u.id as user_id,
+                u.first_name,
+                u.last_name,
+                u.email,
+                u.username,
+                u.bio,
+                t.id as tag_id,
+                t.label as tag_label
             FROM Posts p
+            LEFT JOIN Categories c ON c.id = p.category_id
+            LEFT JOIN Users u ON u.id = p.user_id
+            LEFT JOIN PostTags pt ON pt.post_id = p.id
+            LEFT JOIN Tags t ON t.id = pt.tag_id
             ORDER BY p.publication_date DESC
             """
-
-        expand_categories = False
-        expand_users = False
-
-        if url and "query_params" in url and "_expand" in url["query_params"]:
-            if "categories" in url["query_params"]["_expand"]:
-                expand_categories = True
-            if "users" in url["query_params"]["_expand"]:
-                expand_users = True
-
-        if expand_categories and expand_users:
-            query = """
-                SELECT
-                    p.id,
-                    p.user_id,
-                    p.category_id,
-                    p.title,
-                    p.publication_date,
-                    p.image_url,
-                    p.content,
-                    p.approved,
-                    c.id as c_id,
-                    c.label,
-                    u.id as u_id,
-                    u.first_name,
-                    u.last_name,
-                    u.email,
-                    u.username,
-                    u.bio
-                FROM Posts p
-                JOIN Categories c ON c.id = p.category_id
-                JOIN Users u ON u.id = p.user_id
-                ORDER BY p.publication_date DESC
-                """
-        elif expand_categories:
-            query = """
-                SELECT
-                    p.id,
-                    p.user_id,
-                    p.category_id,
-                    p.title,
-                    p.publication_date,
-                    p.image_url,
-                    p.content,
-                    p.approved,
-                    c.id as c_id,
-                    c.label
-                FROM Posts p
-                JOIN Categories c ON c.id = p.category_id
-                ORDER BY p.publication_date DESC
-                """
-        elif expand_users:
-            query = """
-                SELECT
-                    p.id,
-                    p.user_id,
-                    p.category_id,
-                    p.title,
-                    p.publication_date,
-                    p.image_url,
-                    p.content,
-                    p.approved,
-                    u.id as u_id,
-                    u.first_name,
-                    u.last_name,
-                    u.email,
-                    u.username,
-                    u.bio
-                FROM Posts p
-                JOIN Users u ON u.id = p.user_id
-                ORDER BY p.publication_date DESC
-                """
 
         db_cursor.execute(query)
         query_results = db_cursor.fetchall()
 
-        posts = []
+        posts_dict = {}
+
         for row in query_results:
-            post = dict(row)
-
-            if expand_categories:
-                categories = {"id": post.pop("c_id"), "label": post.pop("label")}
-                post["categories"] = categories
-
-            if expand_users:
-                user = {
-                    "id": post.pop("u_id"),
-                    "first_name": post.pop("first_name"),
-                    "last_name": post.pop("last_name"),
-                    "email": post.pop("email"),
-                    "username": post.pop("username"),
-                    "bio": post.pop("bio"),
+            post_id = row["id"]
+            if post_id not in posts_dict:
+                posts_dict[post_id] = {
+                    "id": row["id"],
+                    "user_id": row["user_id"],
+                    "category_id": row["category_id"],
+                    "title": row["title"],
+                    "publication_date": row["publication_date"],
+                    "image_url": row["image_url"],
+                    "content": row["content"],
+                    "approved": row["approved"],
+                    "categories": {
+                        "id": row["category_id"],
+                        "label": row["category_label"]
+                    } if row["category_id"] else None,
+                    "user": {
+                        "id": row["user_id"],
+                        "first_name": row["first_name"],
+                        "last_name": row["last_name"],
+                        "email": row["email"],
+                        "username": row["username"],
+                        "bio": row["bio"]
+                    } if row["user_id"] else None,
+                    "tags": []
                 }
-                post["user"] = user
 
-            posts.append(post)
+            if row["tag_id"]:
+                posts_dict[post_id]["tags"].append({
+                    "id": row["tag_id"],
+                    "label": row["tag_label"]
+                })
 
+        posts = list(posts_dict.values())
         serialized_posts = json.dumps(posts)
 
     return serialized_posts
